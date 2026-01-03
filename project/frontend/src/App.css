@@ -1,0 +1,250 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, #e0f7fb, #f5ffff);
+  color: #064e3b;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-card {
+  max-width: 1100px;
+  width: 100%;
+  background: #f9ffff;
+  border-radius: 32px;
+  padding: 32px 32px 40px;
+  box-shadow: 0 28px 80px rgba(15, 118, 110, 0.18);
+  border: 1px solid rgba(14, 116, 144, 0.1);
+}
+
+.title {
+  text-align: center;
+  margin: 0;
+  font-size: 28px;
+  color: #0f766e;
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 6px;
+  margin-bottom: 24px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.search-block {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.search-row {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-row input {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-row input::placeholder {
+  color: #94a3b8;
+}
+
+.search-row input:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+}
+
+.search-row button {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: none;
+  background: #0d9488;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.search-row button:hover {
+  background: #0f766e;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(15, 118, 110, 0.3);
+}
+
+.search-row button:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.error-text {
+  margin-top: 6px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+.chips-row {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #bae6fd;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+}
+
+.chip:hover {
+  background: #bae6fd;
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(56, 189, 248, 0.35);
+}
+
+.chip--active {
+  background: #0ea5e9;
+  border-color: #0284c7;
+  color: white;
+}
+
+.muted {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.muted-small {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.col {
+  background: #f5fbfb;
+  border-radius: 20px;
+  padding: 16px 16px 18px;
+  border: 1px solid #dbeafe;
+}
+
+.section-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.block-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 12px 14px 14px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+}
+
+.track-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.block-card p {
+  margin: 4px 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #ecfeff;
+  border: 1px solid #0ea5e9;
+  color: #0369a1;
+  font-size: 12px;
+}
+
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.score-table th,
+.score-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.score-table th {
+  text-align: left;
+  color: #64748b;
+}
+
+.table-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.score-table thead th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+.track-item--active {
+  background: #e0faff;
+}
+
+.table-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
