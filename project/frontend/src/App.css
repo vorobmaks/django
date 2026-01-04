@@ -223,6 +223,7 @@ body {
   max-height: 520px;
   overflow-y: auto;
   border-radius: 8px;
+  padding-right: 12px;
 }
 
 .score-table thead th {
@@ -247,4 +248,38 @@ body {
 
 .table-scroll::-webkit-scrollbar-track {
   background: transparent;
+}
+
+.score-table th:nth-child(4),
+.score-table td:nth-child(4) {
+  padding-left: 40px;
+}
+
+.score-table tr {
+  transition: background-color 0.2s ease;
+}
+
+.block-card {
+  transition: opacity 0.3s ease;
+}
+
+.block-card {
+  position: relative;
+  transition: opacity 0.2s ease;
+}
+
+.block-card--loading {
+  opacity: 0.6;
+}
+
+.block-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
 }
