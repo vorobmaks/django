@@ -38,6 +38,7 @@ export default function App() {
   const [selectedContext, setSelectedContext] = useState("");
 
   const [genres, setGenres] = useState([]);
+  const [contexts, setContexts] = useState([]);
 
   const [tracks, setTracks] = useState([]);
   const [selectedTrack, setSelectedTrack] = useState(null);
@@ -59,11 +60,15 @@ export default function App() {
       setError("");
 
       try {
-        const res = await axios.get(`${API_BASE}/genres/`);
-        setGenres(res.data.genres || []);
+        const [g, c] = await Promise.all([
+          axios.get(`${API_BASE}/genres/`),
+          axios.get(`${API_BASE}/contexts/`)
+        ]);
+        setGenres(g.data.genres || []);
+        setContexts(c.data.contexts || []);
       } catch (e) {
         console.error(e);
-        setError("Не вдалося завантажити жанри. Перевір бекенд.");
+        setError("Не вдалося завантажити жанри або контексти. Перевір бекенд.");
       } finally {
         setLoadingMeta(false);
       }
@@ -90,29 +95,15 @@ export default function App() {
           const res = await axios.get(`${API_BASE}/top/`, {
             params: { top_n: 3000, ...paramsBase },
           });
-
           fetchedTracks = res.data.tracks || [];
-
-          const filtered = fetchedTracks.filter(
-            (t) => t.probability <= 0.98
-          );
-
+          const filtered = fetchedTracks.filter((t) => t.probability <= 0.98);
           setTracks(filtered.slice(0, TOP_DEFAULT));
         } else {
           const res = await axios.get(`${API_BASE}/search_ranked/`, {
-            params: {
-              q: activeQuery.trim(),
-              top_n: SEARCH_FETCH_TOPN,
-              ...paramsBase,
-            },
+            params: { q: activeQuery.trim(), top_n: SEARCH_FETCH_TOPN, ...paramsBase },
           });
-
           fetchedTracks = res.data.tracks || [];
-
-          const filtered = fetchedTracks.filter(
-            (t) => t.probability <= 0.98
-          );
-
+          const filtered = fetchedTracks.filter((t) => t.probability <= 0.98);
           setTracks(filtered);
         }
       } catch (e) {
@@ -128,16 +119,10 @@ export default function App() {
   }, [activeQuery, selectedGenre, selectedContext]);
 
   useEffect(() => {
-    if (!tracks.length) {
-      setVisibleCount(0);
-    } else {
-      setVisibleCount(Math.min(TOP_DEFAULT, tracks.length));
-    }
+    setVisibleCount(tracks.length ? Math.min(TOP_DEFAULT, tracks.length) : 0);
   }, [tracks]);
 
-  const handleSearch = () => {
-    setActiveQuery(queryInput.trim());
-  };
+  const handleSearch = () => setActiveQuery(queryInput.trim());
 
   const clearAll = () => {
     setQueryInput("");
@@ -156,10 +141,8 @@ export default function App() {
 
   const fetchPredictForTrack = async (track) => {
     if (!track) return;
-
     const id = track.id;
 
-    // Кеш: не дергаємо бекенд вдруге
     if (predictCache[id]) {
       setPredictData(predictCache[id]);
       setPredictError("");
@@ -172,7 +155,6 @@ export default function App() {
     try {
       const res = await axios.post(`${API_BASE}/predict/`, { id });
       const data = res.data || null;
-
       setPredictData(data);
       setPredictCache((prev) => ({ ...prev, [id]: data }));
     } catch (e) {
@@ -230,10 +212,7 @@ export default function App() {
     () => ({
       responsive: true,
       maintainAspectRatio: false,
-      animation: {
-        duration: 600,
-        easing: "easeOutQuart",
-      },
+      animation: { duration: 600, easing: "easeOutQuart" },
       plugins: {
         legend: { display: false },
         title: {
@@ -249,12 +228,7 @@ export default function App() {
         },
       },
       scales: {
-        y: {
-          beginAtZero: true,
-          max: 1,
-          ticks: { callback: (v) => `${Math.round(v * 100)}%` },
-          grid: { color: "#e5e7eb" },
-        },
+        y: { beginAtZero: true, max: 1, ticks: { callback: (v) => `${Math.round(v * 100)}%` }, grid: { color: "#e5e7eb" } },
         x: { grid: { display: false } },
       },
     }),
@@ -265,7 +239,7 @@ export default function App() {
     <div className="page">
       <div className="main-card">
         <h1 className="title">Контекстна популярність треків Spotify</h1>
-        <p className="subtitle">Пошук і аналіз треків + фільтри жанру.</p>
+        <p className="subtitle">Пошук і аналіз треків + фільтри жанру та контексту.</p>
 
         <div className="search-block">
           <label className="field-label">Пошук треку</label>
@@ -288,11 +262,13 @@ export default function App() {
           {(selectedGenre || selectedContext) && (
             <div className="chips-row" style={{ marginTop: 10 }}>
               {selectedGenre && (
-                <span
-                  className="chip chip--active"
-                  onClick={() => setSelectedGenre("")}
-                >
+                <span className="chip chip--active" onClick={() => setSelectedGenre("")}>
                   Жанр: {selectedGenre} ✕
+                </span>
+              )}
+              {selectedContext && (
+                <span className="chip chip--active" onClick={() => setSelectedContext("")}>
+                  Контекст: {selectedContext} ✕
                 </span>
               )}
               <button className="chip" onClick={clearFilters}>
@@ -302,30 +278,27 @@ export default function App() {
           )}
 
           {error && <div className="error-text">{error}</div>}
-          {loadingMeta && (
-            <div className="muted-small">Завантаження жанрів…</div>
-          )}
+          {loadingMeta && <div className="muted-small">Завантаження жанрів і контекстів…</div>}
         </div>
 
         <div className="columns">
           <div className="col">
             <h2 className="section-title">Жанри</h2>
-            <div
-              className="chips-row"
-              style={{ maxHeight: 260, overflow: "auto" }}
-            >
-              {genres.length === 0 && !loadingMeta && (
-                <span className="muted-small">Жанри не завантажились.</span>
-              )}
+            <div className="chips-row" style={{ maxHeight: 260, overflow: "auto" }}>
+              {genres.length === 0 && !loadingMeta && <span className="muted-small">Жанри не завантажились.</span>}
               {genres.map((g) => (
-                <button
-                  key={g}
-                  className={
-                    "chip" + (selectedGenre === g ? " chip--active" : "")
-                  }
-                  onClick={() => setSelectedGenre(g)}
-                >
+                <button key={g} className={"chip" + (selectedGenre === g ? " chip--active" : "")} onClick={() => setSelectedGenre(g)}>
                   {g}
+                </button>
+              ))}
+            </div>
+
+            <h2 className="section-title" style={{ marginTop: 12 }}>Контексти</h2>
+            <div className="chips-row" style={{ maxHeight: 260, overflow: "auto" }}>
+              {contexts.length === 0 && !loadingMeta && <span className="muted-small">Контексти не завантажились.</span>}
+              {contexts.map((c) => (
+                <button key={c} className={"chip" + (selectedContext === c ? " chip--active" : "")} onClick={() => setSelectedContext(c)}>
+                  {c}
                 </button>
               ))}
             </div>
@@ -335,57 +308,29 @@ export default function App() {
             {selectedTrack ? (
               <div className="block-card">
                 <h3 className="track-title">{selectedTrack.track_name}</h3>
-                <p>
-                  <b>Виконавець:</b> {selectedTrack.artist_name}
-                </p>
-                <p>
-                  <b>Жанр:</b> {selectedTrack.genre || "—"}
-                </p>
-                <p>
-                  <b>Найкращий контекст:</b>{" "}
-                  <span className="badge">
-                    {selectedTrack.best_context || "—"}
-                  </span>
-                </p>
-                <p>
-                  <b>Популярність:</b> {fmtProb(selectedTrack.probability)}
-                </p>
+                <p><b>Виконавець:</b> {selectedTrack.artist_name}</p>
+                <p><b>Жанр:</b> {selectedTrack.genre || "—"}</p>
+                <p><b>Найкращий контекст:</b> <span className="badge">{selectedTrack.best_context || "—"}</span></p>
+                <p><b>Популярність:</b> {fmtProb(selectedTrack.probability)}</p>
 
                 <div style={{ height: 10 }} />
-                <h4 style={{ margin: "8px 0" }}>
-                  Ймовірність популярності по контекстах
-                </h4>
+                <h4 style={{ margin: "8px 0" }}>Ймовірність популярності по контекстах</h4>
 
                 <div style={{ minHeight: "20px" }}>
-                  {predictLoading && (
-                    <div className="muted-small">Оновлення…</div>
-                  )}
-                  {predictError && (
-                    <div className="error-text">{predictError}</div>
-                  )}
+                  {predictLoading && <div className="muted-small">Оновлення…</div>}
+                  {predictError && <div className="error-text">{predictError}</div>}
                 </div>
 
                 {predictData?.scores?.length > 0 && (
-                  <div
-                    style={{
-                      opacity: predictLoading ? 0.6 : 1,
-                      transition: "opacity 0.2s ease-in-out",
-                    }}
-                  >
+                  <div style={{ opacity: predictLoading ? 0.6 : 1, transition: "opacity 0.2s ease-in-out" }}>
                     <div className="table-scroll" style={{ maxHeight: 240 }}>
                       <table className="score-table">
                         <thead>
-                          <tr>
-                            <th>Контекст</th>
-                            <th>Ймовірність</th>
-                          </tr>
+                          <tr><th>Контекст</th><th>Ймовірність</th></tr>
                         </thead>
                         <tbody>
                           {predictData.scores.map((s) => (
-                            <tr key={s.context}>
-                              <td>{s.context}</td>
-                              <td>{fmtProb(s.probability)}</td>
-                            </tr>
+                            <tr key={s.context}><td>{s.context}</td><td>{fmtProb(s.probability)}</td></tr>
                           ))}
                         </tbody>
                       </table>
@@ -398,9 +343,7 @@ export default function App() {
                 )}
               </div>
             ) : (
-              <div className="muted">
-                Клікніть по треку справа, щоб побачити деталі.
-              </div>
+              <div className="muted">Клікніть по треку справа, щоб побачити деталі.</div>
             )}
           </div>
 
@@ -408,47 +351,28 @@ export default function App() {
             <h2 className="section-title">{title}</h2>
 
             {loadingList && <p className="muted">Завантаження…</p>}
-            {!loadingList && tracks.length === 0 && (
-              <p className="muted">Нічого не знайдено.</p>
-            )}
+            {!loadingList && tracks.length === 0 && <p className="muted">Нічого не знайдено.</p>}
 
             {!loadingList && tracks.length > 0 && (
               <div className="block-card">
                 <div style={{ marginBottom: 12 }}>
-                  <label
-                    className="field-label"
-                    style={{ display: "block" }}
-                  >
+                  <label className="field-label" style={{ display: "block" }}>
                     Показати пісень у списку: <b>{visibleCount}</b>
-                    {activeQuery && (
-                      <span className="muted-small">
-                        {" "}
-                        (усього {tracks.length})
-                      </span>
-                    )}
+                    {activeQuery && <span className="muted-small"> (усього {tracks.length})</span>}
                   </label>
 
                   {(() => {
-                    const sliderMax = Math.max(
-                      10,
-                      Math.ceil(tracks.length / 10) * 10
-                    );
-
+                    const sliderMax = Math.max(10, Math.ceil(tracks.length / 10) * 10);
                     return (
                       <input
                         type="range"
                         min={10}
                         max={sliderMax}
                         step={10}
-                        value={
-                          visibleCount === tracks.length
-                            ? sliderMax
-                            : visibleCount
-                        }
+                        value={visibleCount === tracks.length ? sliderMax : visibleCount}
                         onChange={(e) => {
                           const v = Number(e.target.value);
-                          if (v === sliderMax) setVisibleCount(tracks.length);
-                          else setVisibleCount(v);
+                          setVisibleCount(v === sliderMax ? tracks.length : v);
                         }}
                         style={{ width: "100%" }}
                       />
@@ -464,17 +388,14 @@ export default function App() {
                         <th>Трек</th>
                         <th>Виконавець</th>
                         <th>Жанр</th>
+                        <th>Контекст</th>
                       </tr>
                     </thead>
                     <tbody>
                       {tracks.slice(0, visibleCount).map((t, i) => (
                         <tr
                           key={t.id}
-                          className={
-                            selectedTrack?.id === t.id
-                              ? "track-item--active"
-                              : ""
-                          }
+                          className={selectedTrack?.id === t.id ? "track-item--active" : ""}
                           onClick={() => onSelectTrack(t)}
                           style={{ cursor: "pointer" }}
                         >
@@ -482,6 +403,7 @@ export default function App() {
                           <td>{t.track_name}</td>
                           <td>{t.artist_name}</td>
                           <td>{t.genre || "—"}</td>
+                          <td>{t.best_context || "—"}</td>
                         </tr>
                       ))}
                     </tbody>

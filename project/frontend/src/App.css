@@ -179,6 +179,24 @@ body {
   padding: 12px 14px 14px;
   border: 1px solid #e2e8f0;
   margin-bottom: 12px;
+  position: relative;
+  transition: opacity 0.2s ease;
+}
+
+.block-card--loading {
+  opacity: 0.6;
+}
+
+.block-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
 }
 
 .track-title {
@@ -201,10 +219,22 @@ body {
   font-size: 12px;
 }
 
+.table-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 8px;
+  padding-right: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .score-table {
   width: 100%;
+  min-width: 0;
   border-collapse: collapse;
-  margin-top: 8px;
+  table-layout: fixed;
+  word-wrap: break-word;
   font-size: 13px;
 }
 
@@ -212,18 +242,12 @@ body {
 .score-table td {
   padding: 6px 8px;
   border-bottom: 1px solid #e2e8f0;
+  overflow-wrap: break-word;
 }
 
 .score-table th {
   text-align: left;
   color: #64748b;
-}
-
-.table-scroll {
-  max-height: 520px;
-  overflow-y: auto;
-  border-radius: 8px;
-  padding-right: 12px;
 }
 
 .score-table thead th {
@@ -257,29 +281,4 @@ body {
 
 .score-table tr {
   transition: background-color 0.2s ease;
-}
-
-.block-card {
-  transition: opacity 0.3s ease;
-}
-
-.block-card {
-  position: relative;
-  transition: opacity 0.2s ease;
-}
-
-.block-card--loading {
-  opacity: 0.6;
-}
-
-.block-card__overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(2px);
-  pointer-events: none;
 }

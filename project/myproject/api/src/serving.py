@@ -12,9 +12,7 @@ MODEL_PATH = BASE_DIR / "model" / "catboost_tuned.cbm"
 class ContextPopularityService:
     def __init__(self, data_path=DATA_PATH, model_path=MODEL_PATH):
         self.df = pd.read_csv(data_path)
-
         self.df = self.df.reset_index(drop=True)
-
         self.model = CatBoostClassifier()
         self.model.load_model(str(model_path))
 
@@ -28,15 +26,9 @@ class ContextPopularityService:
             "key", "mode", "time_signature",
         ]
         self.feature_cols = self.numeric_features + self.categorical_features
-
         self._precompute_probs()
 
     def _precompute_probs(self):
-        """
-        Рахує ймовірності для всіх треків по кожному контексту (batch),
-        зберігає в df колонки prob_<ctx>, best_context, best_probability,
-        а також top_score_weighted (зважений глобальний скор).
-        """
         for col in self.numeric_features:
             if col in self.df.columns:
                 self.df[col] = pd.to_numeric(self.df[col], errors="coerce").fillna(0)
@@ -62,13 +54,12 @@ class ContextPopularityService:
         )
         self.df["best_probability"] = self.df[prob_cols].max(axis=1)
 
-        # ЗВАЖЕНИЙ скор (можеш змінити ваги)
         weights = {
             "workout": 0.25,
-            "party": 0.20,
+            "party": 0.2,
             "focus": 0.25,
-            "sleep_relax": 0.20,
-            "art": 0.10,
+            "sleep_relax": 0.2,
+            "art": 0.1,
         }
         self.df["top_score_weighted"] = 0.0
         for ctx, w in weights.items():
